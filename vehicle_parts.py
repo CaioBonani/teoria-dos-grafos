@@ -16,6 +16,7 @@ Modelagem:
 """
 
 from typing import List, Tuple, Dict, Set
+from collections import defaultdict
 import matplotlib.pyplot as plt
 import networkx as nx
 from main import Graph, get_vertices_num, get_edge_num, get_adj_vertice, get_degree, list_all_degrees
@@ -186,7 +187,7 @@ def entrada_conjuntos(g_projetado: Graph):
     print("   G_projetado = Graph(V_CARROS, edges_projetado, weights)")
     print("   - Atributos adicionais: labels, pecas_compartilhadas")
     
-    print("\n4. Lógica de conversão:")
+    print("\n5. Lógica de conversão:")
     print("   (u, v) ∈ E' ⟺ ∃ p ∈ V_PECAS: (u,p) ∈ E ∧ (v,p) ∈ E")
     
     print(f"\nRESULTADO:")
@@ -195,7 +196,7 @@ def entrada_conjuntos(g_projetado: Graph):
 
 def graus(g_projetado: Graph):
     """
-    Encontrar os vértices de maior e menor grau
+    Encontrar os vértices de maior e menor grau (não-ponderado).
     """
     
     graus = list_all_degrees(g=g_projetado)
@@ -216,7 +217,39 @@ def graus(g_projetado: Graph):
     print(f" Vértices com grau mínimo ({len(vertices_min)}):")
     for v in vertices_min:
         print(f"- {v}: grau = {grau_min}")
-   
+
+    mostra_classificacao_ponderada(g_projetado, top_n=5)
+
+def graus_ponderados(g: Graph) -> Dict[str, int]:
+    """
+    Retorna o grau ponderado para cada veículo:
+    soma dos pesos de todas as arestas incidentes.
+    """
+    wdeg = defaultdict(int)
+    for (u, v) in g.edges:
+        w = g.weights.get((u, v))
+        if w is None:  # If weights are keyed by unordered pairs, try the flipped tuple
+            w = g.weights.get((v, u), 1)
+        wdeg[u] += w
+        wdeg[v] += w
+    return dict(wdeg)
+
+def mostra_classificacao_ponderada(g: Graph, top_n: int = 5) -> None:
+    """
+    Imprime veículos Top-N e Bottom-N por grau ponderado.
+    """
+    wdeg = graus_ponderados(g)
+    ordered = sorted(wdeg.items(), key=lambda x: (-x[1], x[0]))
+
+    print("\nGRAU PONDERADO (soma dos pesos das arestas incidentes)")
+    print(" Top {}:".format(top_n))
+    for car, val in ordered[:top_n]:
+        print(f" - {car}: {val}")
+
+    print("\n Bottom {}:".format(top_n))
+    for car, val in sorted(wdeg.items(), key=lambda x: (x[1], x[0]))[:top_n]:
+        print(f" - {car}: {val}")
+           
 def subgrafos(g_projetado: Graph):
     """
     Considerar subconjuntos do problema e verificar se eles são subgrafos
