@@ -1,7 +1,13 @@
 from graph_input import read_graph_from_terminal, read_graph_from_file
 from matrix_input import (read_matrix_from_terminal, read_matrix_from_file,read_adj_list_from_terminal, read_adj_list_from_file)
 from matrix_display import format_matrix, format_adj_list
-from main import convert_representation, visualize_graph, Graph, adj_matrix_to_graph, incidence_matrix_to_graph, adj_list_to_graph
+from main import (
+    convert_representation, visualize_graph, Graph, 
+    adj_matrix_to_graph, incidence_matrix_to_graph, adj_list_to_graph,
+    get_vertices_num, get_edge_num, get_adj_vertice, edge_exist,
+    get_degree, list_all_degrees, caminho_simples, ciclo_vertice,
+    is_subgraph
+)
 import os
 
 def clear_screen():
@@ -20,6 +26,15 @@ def print_menu():
     print("7. Mostrar matriz de adjacência")
     print("8. Mostrar matriz de incidência")
     print("9. Mostrar lista de adjacência")
+    print("10. Verificar número de vértices")
+    print("11. Verificar número de arestas")
+    print("12. Verificar vértices adjacentes")
+    print("13. Verificar existência de aresta")
+    print("14. Verificar grau de um vértice")
+    print("15. Listar graus de todos os vértices")
+    print("16. Encontrar caminho simples entre dois vértices")
+    print("17. Encontrar ciclo para um vértice")
+    print("18. Verificar subgrafo")
     print("0. Sair")
     print("===================")
 
@@ -167,6 +182,126 @@ def main():
                                            True if hasattr(graph, 'weights') else False,
                                            graph.weights if hasattr(graph, 'weights') else None))
             
+            elif choice == '10':  # Número de vértices
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    n = get_vertices_num(g=graph)
+                    print(f"\nNúmero de vértices: {n}")
+
+            elif choice == '11':  # Número de arestas
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    m = get_edge_num(g=graph)
+                    print(f"\nNúmero de arestas: {m}")
+
+            elif choice == '12':  # Vértices adjacentes
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nVértices disponíveis:", graph.vertices)
+                    vertice = input("Digite o vértice para verificar adjacências: ").strip()
+                    if vertice not in graph.vertices:
+                        print(f"\nVértice '{vertice}' não encontrado!")
+                    else:
+                        adj = get_adj_vertice(vertice, g=graph)
+                        print(f"\nVértices adjacentes a {vertice}:", adj)
+
+            elif choice == '13':  # Verificar existência de aresta
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nVértices disponíveis:", graph.vertices)
+                    v1 = input("Digite o primeiro vértice: ").strip()
+                    v2 = input("Digite o segundo vértice: ").strip()
+                    if v1 not in graph.vertices or v2 not in graph.vertices:
+                        print("\nUm ou mais vértices não encontrados!")
+                    else:
+                        exists = edge_exist(v1, v2, g=graph)
+                        if exists:
+                            print(f"\nExiste uma aresta entre {v1} e {v2}")
+                        else:
+                            print(f"\nNão existe aresta entre {v1} e {v2}")
+
+            elif choice == '14':  # Grau de um vértice
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nVértices disponíveis:", graph.vertices)
+                    vertice = input("Digite o vértice: ").strip()
+                    if vertice not in graph.vertices:
+                        print(f"\nVértice '{vertice}' não encontrado!")
+                    else:
+                        grau = get_degree(vertice, g=graph)
+                        print(f"\nGrau do vértice {vertice}: {grau}")
+
+            elif choice == '15':  # Listar graus
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    graus = list_all_degrees(g=graph)
+                    print("\nGraus dos vértices:")
+                    for v, g in graus.items():
+                        print(f"  {v}: {g}")
+
+            elif choice == '16':  # Caminho simples
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nVértices disponíveis:", graph.vertices)
+                    v1 = input("Digite o vértice de origem: ").strip()
+                    v2 = input("Digite o vértice de destino: ").strip()
+                    if v1 not in graph.vertices or v2 not in graph.vertices:
+                        print("\nUm ou mais vértices não encontrados!")
+                    else:
+                        caminho = caminho_simples([], v1, v2, g=graph)
+                        if caminho:
+                            print(f"\nCaminho encontrado: {' -> '.join(caminho)}")
+                        else:
+                            print(f"\nNão existe caminho entre {v1} e {v2}")
+
+            elif choice == '17':  # Ciclo para vértice
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nVértices disponíveis:", graph.vertices)
+                    vertice = input("Digite o vértice: ").strip()
+                    if vertice not in graph.vertices:
+                        print(f"\nVértice '{vertice}' não encontrado!")
+                    else:
+                        ciclo = ciclo_vertice(vertice, g=graph)
+                        if ciclo:
+                            print(f"\nCiclo encontrado: {' -> '.join(ciclo)}")
+                        else:
+                            print(f"\nNão existe ciclo para o vértice {vertice}")
+
+            elif choice == '18':  # Verificar subgrafo
+                if graph is None:
+                    print("\nNenhum grafo foi inserido ainda!")
+                else:
+                    print("\nInsira o grafo que pode ser subgrafo:")
+                    print_submenu_entrada()
+                    sub_choice = input("\nEscolha uma opção: ").strip()
+                    
+                    if sub_choice == '0':
+                        continue
+                    elif sub_choice == '1':
+                        subgraph = read_graph_from_terminal(False)
+                    elif sub_choice == '2':
+                        show_input_file_tutorial()
+                        filename = input("\nDigite o nome do arquivo: ").strip()
+                        subgraph = read_graph_from_file(filename, False)
+                    else:
+                        print("\nOpção inválida!")
+                        continue
+
+                    is_sub = is_subgraph(g1=graph, g2=subgraph)
+                    if is_sub:
+                        print("\nÉ um subgrafo!")
+                    else:
+                        print("\nNão é um subgrafo.")
+
             else:
                 print("\nOpção inválida!")
                 
