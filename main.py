@@ -559,137 +559,83 @@ def is_subgraph(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = N
 
 
 
-# --- pequeno exemplo demonstrativo ---
+# --- Exemplo demonstrativo com dois grafos ---
 if __name__ == "__main__":
-    # Exemplo: grafo com 4 vértices e algumas arestas
-    vertices = ['A', 'B', 'C', 'D']
-    edges = [('A', 'B'), ('A', 'C'), ('B', 'C'), ('C', 'C')]  # nota: loop em C
-    g = Graph(vertices, edges)
+    print("\n=== Criando o grafo principal (G1) ===")
+    # Grafo principal com 6 vértices representando uma casa
+    vertices_g1 = ['Sala', 'Cozinha', 'Quarto1', 'Quarto2', 'Banheiro', 'Varanda']
+    edges_g1 = [
+        ('Sala', 'Cozinha'), ('Sala', 'Quarto1'), ('Sala', 'Quarto2'),
+        ('Quarto1', 'Banheiro'), ('Quarto2', 'Banheiro'), ('Sala', 'Varanda')
+    ]
+    g1 = Graph(vertices_g1, edges_g1)
+    print("Grafo G1 (Casa completa):", g1)
 
-    print("G:", g)
-    M = graph_to_adj_matrix(g)
-    print("Matriz de adjacência:")
-    for row in M:
+    # Criar todas as representações para G1
+    M1 = graph_to_adj_matrix(g1)
+    I1 = graph_to_incidence_matrix(g1)
+    adj1 = graph_to_adj_list(g1)
+
+    print("\nMatriz de adjacência do G1:")
+    for row in M1:
         print(row)
-
-    I = graph_to_incidence_matrix(g)
-    print("Matriz de incidência (linhas=vértices, colunas=arestas):")
-    for row in I:
-        print(row)
-
-    adj = graph_to_adj_list(g)
-    print("Lista de adjacência:")
-    for k, v in adj.items():
+    
+    print("\nLista de adjacência do G1:")
+    for k, v in adj1.items():
         print(f"{k}: {v}")
 
-    #um segundo grafo para testar a funcao de subgrafo
-    vertices2 = ['A', 'C', 'D']
-    edges2 = [('A', 'C'), ('C', 'C')]
-    g2 = Graph(vertices2, edges2)
+    print("\n=== Criando o subgrafo (G2) ===")
+    # Subgrafo representando apenas uma parte da casa
+    vertices_g2 = ['Sala', 'Quarto1', 'Banheiro']
+    edges_g2 = [('Sala', 'Quarto1'), ('Quarto1', 'Banheiro')]
+    g2 = Graph(vertices_g2, edges_g2)
+    print("Grafo G2 (Parte da casa):", g2)
 
-    print("G:", g2)
+    # Criar todas as representações para G2
     M2 = graph_to_adj_matrix(g2)
-    print("Matriz de adjacência:")
-    for row in M2:
-        print(row)
-
     I2 = graph_to_incidence_matrix(g2)
-    print("Matriz de incidência (linhas=vértices, colunas=arestas):")
-    for row in I2:
-        print(row)
-
     adj2 = graph_to_adj_list(g2)
-    print("Lista de adjacência:")
-    for k, v in adj2.items():
-        print(f"{k}: {v}")
 
-    # Converta de matriz de adjacência de volta ao grafo
-    g_adjm = adj_matrix_to_graph(M, vertices)
-    print("Grafo reconstituído de M:", g_adjm)
+    print("\n=== Análise dos grafos ===")
+    print(f"Número de vértices G1: {get_vertices_num(g=g1)}")
+    print(f"Número de arestas G1: {get_edge_num(g=g1)}")
+    print(f"Número de vértices G2: {get_vertices_num(g=g2)}")
+    print(f"Número de arestas G2: {get_edge_num(g=g2)}")
 
-    # Converta de matriz de incidência de volta ao grafo
-    g_im = incidence_matrix_to_graph(I, vertices)
-    print("Grafo reconstituído de I:", g_im)
+    print("\n=== Vértices adjacentes ===")
+    print(f"Adjacentes à Sala em G1: {get_adj_vertice('Sala', g=g1)}")
+    print(f"Adjacentes à Sala em G2: {get_adj_vertice('Sala', g=g2)}")
 
-    print("Número de vértices do Grafo: ", get_vertices_num(g = g))
-    print("Número de vértices da Matriz de Adjacência: ", get_vertices_num(M = M))
-    print("Número de vértices da Matriz de Incidência: ", get_vertices_num(I = I))
-    print("Número de vértices da Lista de Adjacência", get_vertices_num(adj = adj))
+    print("\n=== Verificação de arestas ===")
+    print(f"Existe aresta Sala-Cozinha em G1? {edge_exist('Sala', 'Cozinha', g=g1)}")
+    print(f"Existe aresta Sala-Cozinha em G2? {edge_exist('Sala', 'Cozinha', g=g2)}")
 
-    print("Número de arestas do Grafo: ", get_edge_num(g = g))
-    print("Número de arestas da Matriz de Adjacência: ", get_edge_num(M = M))
-    print("Número de arestas da Matriz de Incidência: ", get_edge_num(I = I))
-    print("Número de arestas da Lista de Adjacência: ", get_edge_num(adj = adj))
+    print("\n=== Graus dos vértices ===")
+    print("Graus em G1:", list_all_degrees(g=g1))
+    print("Graus em G2:", list_all_degrees(g=g2))
 
-    v0 = 'C'
-    v1 = 2
-    v2 = 2
-    v3 = 'C'
-    print("Lista de vértices adjacentes de ", v0, ": ", get_adj_vertice(vertice = v0, g = g))
-    print("Lista de vértices adjacentes de ", v1, ": ", get_adj_vertice(vertice = v1, M = M))
-    print("Lista de vértices adjacentes de ", v2, ": ", get_adj_vertice(vertice = v2, I = I))
-    print("Lista de vértices adjacentes de ", v3, ": ", get_adj_vertice(vertice = v3, adj = adj))
-
-    v4 = 'A'
-    v5 = 'B'
-    v6 = 0
-    v7 = 1
-    v8 = 0
-    v9 = 1
-    v10 = 'A'
-    v11 = 'B'
-    print("Existência da aresta ", v4, "-", v5, edge_exist(vertice1 = v4, vertice2 = v5, g = g))
-    print("Existência da aresta ", v6, "-", v7, edge_exist(vertice1 = v6, vertice2 = v7, M = M))
-    print("Existência da aresta ", v8, "-", v9, edge_exist(vertice1 = v8, vertice2 = v9, I = I))
-    print("Existência da aresta ", v10, "-", v11, edge_exist(vertice1 = v10, vertice2 = v11, adj = adj))
-
-    v12 = 'A'
-    v13 = 0
-    v14 = 0
-    v15 = 'A'
-    print("Grau de ", v12, ": ", get_degree(vertice = v12, g = g))
-    print("Grau de ", v13, ": ", get_degree(vertice = v13, M = M))
-    print("Grau de ", v14, ": ", get_degree(vertice = v14, I = I))
-    print("Grau de ", v15, ": ", get_degree(vertice = v15, adj = adj))
-
-    print("Grau de todos os vértices do Grafo: ", list_all_degrees(g = g))
-    print("Grau de todos os vértices da Matriz de Adjacência: ", list_all_degrees(M = M))
-    print("Grau de todos os vértices da Matriz de Incidência: ", list_all_degrees(I = I))
-    print("Grau de todos os vértices da Lista de Adjacência: ", list_all_degrees(adj = adj))
-
-    v16 = 'A'
-    v17 = 'C'
-    v18 = 0
-    v19 = 2
-    v20 = 0
-    v21 = 2
-    v22 = 'A'
-    v23 = 'C'
-    caminho0 = []
+    print("\n=== Caminhos simples ===")
     caminho1 = []
     caminho2 = []
-    caminho3 = []
-    print("Caminho simples de ", v16, "a", v17, ": ", caminho_simples(caminho = caminho0, vertice1 = v16, vertice2 = v17, g = g))
-    print("Caminho simples de ", v18, "a", v19, ": ", caminho_simples(caminho = caminho1, vertice1 = v18, vertice2 = v19, M = M))
-    print("Caminho simples de ", v20, "a", v21, ": ", caminho_simples(caminho = caminho2, vertice1 = v20, vertice2 = v21, I = I))
-    print("Caminho simples de ", v22, "a", v23, ": ", caminho_simples(caminho = caminho3, vertice1 = v22, vertice2 = v23, adj = adj))
-    
-    v24 = 'A'
-    v25 = 1
-    v26 = 1
-    v27 = 'A'
-    print("Ciclo de ", v24, ": ", ciclo_vertice(vertice = v24, g = g))
-    print("Ciclo de ", v25, ": ", ciclo_vertice(vertice = v25, M = M))
-    print("Ciclo de ", v26, ": ", ciclo_vertice(vertice = v26, I = I))
-    print("Ciclo de ", v27, ": ", ciclo_vertice(vertice = v27, adj = adj))
+    print("Caminho Sala->Banheiro em G1:", caminho_simples(caminho1, 'Sala', 'Banheiro', g=g1))
+    print("Caminho Sala->Banheiro em G2:", caminho_simples(caminho2, 'Sala', 'Banheiro', g=g2))
 
-    print("g2 é subgrafo de g1: ", is_subgraph(g1 = g, g2 = g2))
-    print("M2 é subgrafo de M1: ", is_subgraph(M1 = M, M2 = M2, v_list = vertices, v_list2 = vertices2))
-    print("I2 é subgrafo de I1: ", is_subgraph(I1 = I, I2 = I2, v_list = vertices, v_list2 = vertices2))
-    print("adj2 é subgrafo de adj1: ", is_subgraph(adj1 = adj, adj2 = adj2))
+    print("\n=== Procurando ciclos ===")
+    print("Ciclo partindo da Sala em G1:", ciclo_vertice('Sala', g=g1))
+    print("Ciclo partindo da Sala em G2:", ciclo_vertice('Sala', g=g2))
 
-    # Visualize (requer networkx + matplotlib no ambiente)
+    print("\n=== Verificação de subgrafo ===")
+    print("G2 é subgrafo de G1?", is_subgraph(g1=g1, g2=g2))
+    print("Verificando outras representações:")
+    print("- Matriz de adjacência:", is_subgraph(M1=M1, M2=M2, v_list=vertices_g1, v_list2=vertices_g2))
+    print("- Matriz de incidência:", is_subgraph(I1=I1, I2=I2, v_list=vertices_g1, v_list2=vertices_g2))
+    print("- Lista de adjacência:", is_subgraph(adj1=adj1, adj2=adj2))
+
+    print("\n=== Visualização dos grafos ===")
     try:
-        visualize_graph(g, "Exemplo")
+        print("\nVisualizando G1 (Casa completa):")
+        visualize_graph(g1, "Casa Completa (G1)")
+        print("\nVisualizando G2 (Parte da casa):")
+        visualize_graph(g2, "Parte da Casa (G2)")
     except Exception as e:
         print("Visualização falhou (talvez matplotlib não instalado):", e)
