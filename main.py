@@ -494,7 +494,7 @@ def ciclo_vertice(vertice: object, g: Graph = None, M = None, I = None, adj = No
                 return ciclo
     return None
     
-def is_subgraph(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = None, I2 = None, adj1 = None, adj2 = None, v_list: List = None, v_list2: List = None) -> bool:
+def is_subgraph_21(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = None, I2 = None, adj1 = None, adj2 = None, v_list: List = None, v_list2: List = None) -> bool:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
     em todos os casos primeiro checa se os vertices estao contidos em g1 e entao se as arestas tambem estao
@@ -555,8 +555,38 @@ def is_subgraph(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = N
         return True
 
 
+def is_subgraph(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = None, I2 = None, adj1 = None, adj2 = None, v_list: List = None, v_list2: List = None) -> int:
+    if g1 and g2:
+        if is_subgraph_21(g1 = g1, g2 = g2):
+            return 2
+        elif is_subgraph_21(g1 = g2, g2 = g1):
+            return 1
+        else:
+            return 0
 
+    elif M1 and M2:
+        if is_subgraph_21(M1 = M1, M2 = M2, v_list = v_list, v_list2 = v_list2):
+            return 2
+        elif is_subgraph_21(M1 = M2, M2 = M1, v_list = v_list2, v_list2 = v_list):
+            return 1
+        else:
+            return 0
 
+    elif I1 and I2:
+        if is_subgraph_21(I1 = I1, I2 = I2, v_list = v_list, v_list2 = v_list2):
+            return 2
+        elif is_subgraph_21(I1 = I2, I2 = I1, v_list = v_list2, v_list2 = v_list):
+            return 1
+        else:
+            return 0
+
+    elif adj1 and adj2:
+        if is_subgraph_21(adj1 = adj1, adj2 = adj2):
+            return 2
+        elif is_subgraph_21(adj1 = adj2, adj2 = adj1):
+            return 1
+        else:
+            return 0
 
 
 # --- Exemplo demonstrativo com dois grafos ---
@@ -625,7 +655,8 @@ if __name__ == "__main__":
     print("Ciclo partindo da Sala em G2:", ciclo_vertice('Sala', g=g2))
 
     print("\n=== Verificação de subgrafo ===")
-    print("G2 é subgrafo de G1?", is_subgraph(g1=g1, g2=g2))
+    print("0 = não, 1 = G1 é subgrafo de G2, 2 = G2 é subgrafo de G1")
+    print("Dado G1 e G2, são subgrafos entre si?", is_subgraph(g1=g1, g2=g2))
     print("Verificando outras representações:")
     print("- Matriz de adjacência:", is_subgraph(M1=M1, M2=M2, v_list=vertices_g1, v_list2=vertices_g2))
     print("- Matriz de incidência:", is_subgraph(I1=I1, I2=I2, v_list=vertices_g1, v_list2=vertices_g2))
