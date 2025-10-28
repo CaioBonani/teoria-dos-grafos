@@ -7,13 +7,13 @@ import networkx as nx
 class Graph:
     """
     Representa um grafo simples não-direcionado, possivelmente com pesos nas arestas.
-    vertices: lista de rótulos (qualquer hashable)
-    edges: lista de tuplas (u, v) com u, v em vertices
+    nodes: lista de rótulos (qualquer hashable)
+    edges: lista de tuplas (u, v) com u, v em nodes
     weights: dicionário opcional que mapeia arestas (u, v) para seus pesos
     Observações: armazena arestas como (u, v) com u and v nos rótulos originais.
     """
-    def __init__(self, vertices: List[Any], edges: List[Tuple[Any, Any]], weights: Dict[Tuple[Any, Any], float] = None):
-        self.vertices = list(vertices)
+    def __init__(self, nodes: List[Any], edges: List[Tuple[Any, Any]], weights: Dict[Tuple[Any, Any], float] = None):
+        self.nodes = list(nodes)
         # normalizar arestas: ordenar par (menor, maior) para grafos não-direcionados
         normalized = []
         self.weights = {}
@@ -36,17 +36,17 @@ class Graph:
         self.edges = normalized
 
     def __repr__(self):
-        return f"Graph(vertices={self.vertices}, edges={self.edges})"
+        return f"Graph(nodes={self.nodes}, edges={self.edges})"
 
 
 # 1) Dado um grafo, gere sua matriz de adjacência
 def graph_to_adj_matrix(g: Graph) -> List[List[int]]:
     """
     Retorna uma matriz NxN (lista de listas) com 1 quando há aresta entre i e j, 0 caso contrário.
-    As linhas/colunas seguem a ordem de g.vertices.
+    As linhas/colunas seguem a ordem de g.nodes.
     """
-    n = len(g.vertices)
-    idx = {v: i for i, v in enumerate(g.vertices)}
+    n = len(g.nodes)
+    idx = {v: i for i, v in enumerate(g.nodes)}
     M = [[0 for _ in range(n)] for __ in range(n)]
     for (u, v) in g.edges:
         i, j = idx[u], idx[v]
@@ -55,23 +55,23 @@ def graph_to_adj_matrix(g: Graph) -> List[List[int]]:
     return M
 
 # 2) Dada a matriz de adjacência, gere o grafo correspondente
-def adj_matrix_to_graph(M: List[List[int]], vertices: List[Any] = None) -> Graph:
+def adj_matrix_to_graph(M: List[List[int]], nodes: List[Any] = None) -> Graph:
     """
-    Recebe matriz quadrada M (lista de listas). Se vertices for None, usa rótulos 0..n-1.
+    Recebe matriz quadrada M (lista de listas). Se nodes for None, usa rótulos 0..n-1.
     Constrói arestas (i, j) para cada entrada M[i][j] != 0 com i <= j (evita duplicatas).
     """
     n = len(M)
-    if vertices is None:
-        vertices = list(range(n))
-    if len(vertices) != n:
+    if nodes is None:
+        nodes = list(range(n))
+    if len(nodes) != n:
         raise ValueError("Tamanho da lista de vértices não bate com M")
     edges = []
     for i in range(n):
         for j in range(i, n):  # i<=j para evitar duplicação em matriz simétrica
             val = M[i][j]
             if val:
-                edges.append((vertices[i], vertices[j]))
-    return Graph(vertices, edges)
+                edges.append((nodes[i], nodes[j]))
+    return Graph(nodes, edges)
 
 # 3) Dado um grafo, gere sua matriz de incidência
 def graph_to_incidence_matrix(g: Graph) -> List[List[int]]:
@@ -79,7 +79,7 @@ def graph_to_incidence_matrix(g: Graph) -> List[List[int]]:
     Retorna matriz de incidência com dimensão V x E (linhas = vértices, colunas = arestas).
     Para aresta (u,v): coloca 1 em linha u e 1 em linha v. Para loop (u,u) coloca 2 (incidência dupla).
     """
-    v_list = g.vertices
+    v_list = g.nodes
     idx = {v: i for i, v in enumerate(v_list)}
     m = len(v_list)
     e = len(g.edges)
@@ -93,19 +93,19 @@ def graph_to_incidence_matrix(g: Graph) -> List[List[int]]:
     return I
 
 # 4) Dada uma matriz de incidência, gere o grafo correspondente
-def incidence_matrix_to_graph(I: List[List[int]], vertices: List[Any] = None) -> Graph:
+def incidence_matrix_to_graph(I: List[List[int]], nodes: List[Any] = None) -> Graph:
     """
     Recebe matriz de incidência I (linhas = vértices, colunas = arestas).
     Cada coluna deve ter exatamente dois '1's (arestas normais) ou um '2' (loop).
-    vertices opcional: rótulos das linhas; se None, usa 0..m-1.
+    nodes opcional: rótulos das linhas; se None, usa 0..m-1.
     """
     m = len(I)
     if m == 0:
         return Graph([], [])
     ncols = len(I[0])
-    if vertices is None:
-        vertices = list(range(m))
-    if len(vertices) != m:
+    if nodes is None:
+        nodes = list(range(m))
+    if len(nodes) != m:
         raise ValueError("Tamanho dos vértices não coincide com número de linhas em I")
 
     edges = []
@@ -119,7 +119,7 @@ def incidence_matrix_to_graph(I: List[List[int]], vertices: List[Any] = None) ->
         if len(incident) == 1:
             row, val = incident[0]
             if val == 2:
-                v = vertices[row]
+                v = nodes[row]
                 edges.append((v, v))  # loop
             else:
                 raise ValueError(f"Coluna {col}: único valor de incidência diferente de 0 mas não é 2.")
@@ -128,17 +128,17 @@ def incidence_matrix_to_graph(I: List[List[int]], vertices: List[Any] = None) ->
             r1, v1 = incident[0]
             r2, v2 = incident[1]
             # aceitar se v1 or v2 ==1 (ou até >=1)
-            edges.append((vertices[r1], vertices[r2]))
+            edges.append((nodes[r1], nodes[r2]))
         else:
             raise ValueError(f"Coluna {col}: número de vértices incidentes = {len(incident)} (não é 1 nem 2).")
-    return Graph(vertices, edges)
+    return Graph(nodes, edges)
 
 # 5) Dado um grafo, gere sua lista (lista de adjacência)
 def graph_to_adj_list(g: Graph) -> Dict[Any, List[Any]]:
     """
     Retorna dicionário: vértice -> lista de vizinhos.
     """
-    adj = {v: [] for v in g.vertices}
+    adj = {v: [] for v in g.nodes}
     for (u, v) in g.edges:
         if u == v:
             adj[u].append(v)  # loop aparece uma vez (poderíamos adicionar duas vezes se quisermos)
@@ -153,7 +153,7 @@ def adj_list_to_graph(adj: Dict[Any, List[Any]]) -> Graph:
     Recebe dicionário vértice -> lista de vizinhos (pode conter ambos u->v e v->u).
     Constrói lista de vértices e normaliza arestas (remove duplicatas).
     """
-    vertices = list(adj.keys())
+    nodes = list(adj.keys())
     edges_set = set()
     for u, neighs in adj.items():
         for v in neighs:
@@ -164,7 +164,7 @@ def adj_list_to_graph(adj: Dict[Any, List[Any]]) -> Graph:
                 a, b = (u, v) if (str(u), str(v)) <= (str(v), str(u)) else (v, u)
                 edges_set.add((a, b))
     edges = list(edges_set)
-    return Graph(vertices, edges)
+    return Graph(nodes, edges)
 
 # 7) Implementar função que, dada uma descrição em uma das representações, gere as outras duas
 def convert_representation(obj: Any, kind: str) -> Dict[str, Any]:
@@ -172,7 +172,7 @@ def convert_representation(obj: Any, kind: str) -> Dict[str, Any]:
     kind in {'graph', 'adj_matrix', 'incidence', 'adj_list'}
     Retorna dict com as três representações (graph, adj_matrix, incidence, adj_list)
     - Se for 'graph': obj deve ser Graph
-    - Se for 'adj_matrix': obj deve ser M (lista de listas); vertices opcionais em obj? aqui assume rótulos 0..n-1
+    - Se for 'adj_matrix': obj deve ser M (lista de listas); nodes opcionais em obj? aqui assume rótulos 0..n-1
     - Se for 'incidence': obj deve ser I (lista de listas)
     - Se for 'adj_list': obj deve ser dict
     """
@@ -205,7 +205,7 @@ def visualize_graph(g: Graph, title: str = "Grafo"):
     plt.title(title)
     
     Gnx = nx.Graph()
-    Gnx.add_nodes_from(g.vertices)
+    Gnx.add_nodes_from(g.nodes)
     
     # Adiciona arestas com seus pesos (se existirem)
     if hasattr(g, 'weights') and g.weights:
@@ -234,14 +234,14 @@ def visualize_graph(g: Graph, title: str = "Grafo"):
     plt.tight_layout()
     plt.show()
 
-def get_vertices_num(g: Graph = None, M = None, I = None, adj = None) -> int:
+def get_nodes_num(g: Graph = None, M = None, I = None, adj = None) -> int:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
     usa a variável count para contar quantos vértices tem em cada representação e retorna esse número
     """
     count = 0
     if g:
-        for u in g.vertices:
+        for u in g.nodes:
             count += 1
     elif M:
         for u in M:
@@ -268,7 +268,7 @@ def get_edge_num(g: Graph = None, M = None, I = None, adj = None) -> int:
         for u in g.edges:
             count += 1
     elif M:
-        l = get_vertices_num(M = M)
+        l = get_nodes_num(M = M)
         for u in range(l):
             for v in range(l):
                 if M[u][v] == 1:
@@ -305,13 +305,15 @@ def get_adj_vertice(vertice: object, g: Graph = None, M = None, I = None, adj = 
                 list.append(v)
             if v == vertice and u not in list:
                 list.append(u)
+            if u == v:
+                list.append(u)
     elif M:
-        len = get_vertices_num(M = M)
+        len = get_nodes_num(M = M)
         for i in range(len):
             if M[vertice][i] == 1:
                 list.append(i)
     elif I:
-        n_vertice = get_vertices_num(I = I)
+        n_vertice = get_nodes_num(I = I)
         n_edge = get_edge_num(I = I)
         for i in range(n_edge):
             if I[vertice][i] == 2:
@@ -330,7 +332,7 @@ def get_adj_vertice(vertice: object, g: Graph = None, M = None, I = None, adj = 
 def edge_exist(vertice1: object, vertice2: object, g: Graph = None, M = None, I = None, adj = None) -> bool:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
-    em todos os casos ve se os vertices adjacentes de vertice1 inclui o vertice1
+    em todos os casos ve se os nodes adjacentes de vertice1 inclui o vertice1
     se isso acontece existe a aresta
     """
 
@@ -385,18 +387,18 @@ def get_degree(vertice: object, g: Graph = None, M = None, I = None, adj = None)
 def list_all_degrees(g: Graph = None, M = None, I = None, adj = None) -> dict[object, object]:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
-    para todos os vertices calcula seu grau e adiciona no dicionario que é retornado posteriormente
+    para todos os nodes calcula seu grau e adiciona no dicionario que é retornado posteriormente
     """
     all_degrees = {}
 
     if g:
-        for i in g.vertices:
+        for i in g.nodes:
             all_degrees[i] = get_degree(vertice = i, g = g)
     elif M:
-        for i in range(get_vertices_num(M = M)):
+        for i in range(get_nodes_num(M = M)):
             all_degrees[i] = get_degree(vertice = i, M = M)
     elif I:
-        for i in range(get_vertices_num(I = I)):
+        for i in range(get_nodes_num(I = I)):
             all_degrees[i] = get_degree(vertice = i, I = I)
     elif adj:
         for i in list(adj.keys()):
@@ -407,7 +409,7 @@ def list_all_degrees(g: Graph = None, M = None, I = None, adj = None) -> dict[ob
 def caminho_simples(caminho: list[object], vertice1: object, vertice2: object, g: Graph = None, M = None, I = None, adj = None) -> list[object]:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
-    para todos os casos vai colocando no caminho os vertices visitados a partir dos vertices adjacentes
+    para todos os casos vai colocando no caminho os nodes visitados a partir dos nodes adjacentes
     vai percorrendo recursivamente, se achar um resultado ele é propagado até a primeira chamada da recursão
     caso contrario é retirado o ultimo elemento do caminho e retorna None
     """
@@ -445,9 +447,9 @@ def caminho_simples(caminho: list[object], vertice1: object, vertice2: object, g
 def ciclo_vertice(vertice: object, g: Graph = None, M = None, I = None, adj = None):
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
-    para todos os casos pega os vertices adjacentes do primeiro vertice
+    para todos os casos pega os nodes adjacentes do primeiro vertice
     para cada um deles tenta pegar um terceiro vertice distinto dos que ja estao sendo considerados
-    ao ter 3 vertices distintos tenta achar um caminho entre o terceiro vertice e o primeiro
+    ao ter 3 nodes distintos tenta achar um caminho entre o terceiro vertice e o primeiro
     se achar algum caminho este sera um ciclo
     """
 
@@ -497,26 +499,26 @@ def ciclo_vertice(vertice: object, g: Graph = None, M = None, I = None, adj = No
 def is_subgraph_21(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = None, I2 = None, adj1 = None, adj2 = None, v_list: List = None, v_list2: List = None) -> bool:
     """
     De acordo com g, M, I ou adj for passado como parâmetro trata como a representação respectiva
-    em todos os casos primeiro checa se os vertices estao contidos em g1 e entao se as arestas tambem estao
-    e se estas tem vertices que estao em g2
-    para M e I foi preciso de uma lista com o nome dos vertices para serem identificados em grafos diferentes
+    em todos os casos primeiro checa se os nodes estao contidos em g1 e entao se as arestas tambem estao
+    e se estas tem nodes que estao em g2
+    para M e I foi preciso de uma lista com o nome dos nodes para serem identificados em grafos diferentes
     """
     if g1 and g2:
-        for i in g2.vertices:
-            if i not in g1.vertices:
+        for i in g2.nodes:
+            if i not in g1.nodes:
                 return False
         for j in g2.edges:
             u, v = j
-            if j not in g1.edges or u not in g2.vertices or v not in g2.vertices:
+            if j not in g1.edges or u not in g2.nodes or v not in g2.nodes:
                 return False
         return True
     elif M1 and M2:
         for i in v_list2:
             if i not in v_list:
                 return False
-        num_vertices = get_vertices_num(M = M2)
-        for i in range(num_vertices):
-            for j in range(num_vertices):
+        num_nodes = get_nodes_num(M = M2)
+        for i in range(num_nodes):
+            for j in range(num_nodes):
                 value = M2[i][j]
                 if M1[v_list.index(v_list2[i])][v_list.index(v_list2[j])] != value:
                     return False
@@ -530,7 +532,7 @@ def is_subgraph_21(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 
         for i in range(get_edge_num(I = I2)):
             list = []
             found = False
-            for j in range(get_vertices_num(I = I2)):
+            for j in range(get_nodes_num(I = I2)):
                 if I2[j][i] == 1:
                     list.append(v_list.index(v_list2[j]))
                 elif I2[j][i] == 2:
@@ -593,12 +595,12 @@ def is_subgraph(g1: Graph = None, g2: Graph = None, M1 = None, M2 = None, I1 = N
 if __name__ == "__main__":
     print("\n=== Criando o grafo principal (G1) ===")
     # Grafo principal com 6 vértices representando uma casa
-    vertices_g1 = ['Sala', 'Cozinha', 'Quarto1', 'Quarto2', 'Banheiro', 'Varanda']
+    nodes_g1 = ['Sala', 'Cozinha', 'Quarto1', 'Quarto2', 'Banheiro', 'Varanda']
     edges_g1 = [
         ('Sala', 'Cozinha'), ('Sala', 'Quarto1'), ('Sala', 'Quarto2'),
         ('Quarto1', 'Banheiro'), ('Quarto2', 'Banheiro'), ('Sala', 'Varanda')
     ]
-    g1 = Graph(vertices_g1, edges_g1)
+    g1 = Graph(nodes_g1, edges_g1)
     print("Grafo G1 (Casa completa):", g1)
 
     # Criar todas as representações para G1
@@ -616,9 +618,9 @@ if __name__ == "__main__":
 
     print("\n=== Criando o subgrafo (G2) ===")
     # Subgrafo representando apenas uma parte da casa
-    vertices_g2 = ['Sala', 'Quarto1', 'Banheiro']
+    nodes_g2 = ['Sala', 'Quarto1', 'Banheiro']
     edges_g2 = [('Sala', 'Quarto1'), ('Quarto1', 'Banheiro')]
-    g2 = Graph(vertices_g2, edges_g2)
+    g2 = Graph(nodes_g2, edges_g2)
     print("Grafo G2 (Parte da casa):", g2)
 
     # Criar todas as representações para G2
@@ -627,9 +629,9 @@ if __name__ == "__main__":
     adj2 = graph_to_adj_list(g2)
 
     print("\n=== Análise dos grafos ===")
-    print(f"Número de vértices G1: {get_vertices_num(g=g1)}")
+    print(f"Número de vértices G1: {get_nodes_num(g=g1)}")
     print(f"Número de arestas G1: {get_edge_num(g=g1)}")
-    print(f"Número de vértices G2: {get_vertices_num(g=g2)}")
+    print(f"Número de vértices G2: {get_nodes_num(g=g2)}")
     print(f"Número de arestas G2: {get_edge_num(g=g2)}")
 
     print("\n=== Vértices adjacentes ===")
@@ -658,8 +660,8 @@ if __name__ == "__main__":
     print("0 = não, 1 = G1 é subgrafo de G2, 2 = G2 é subgrafo de G1")
     print("Dado G1 e G2, são subgrafos entre si?", is_subgraph(g1=g1, g2=g2))
     print("Verificando outras representações:")
-    print("- Matriz de adjacência:", is_subgraph(M1=M1, M2=M2, v_list=vertices_g1, v_list2=vertices_g2))
-    print("- Matriz de incidência:", is_subgraph(I1=I1, I2=I2, v_list=vertices_g1, v_list2=vertices_g2))
+    print("- Matriz de adjacência:", is_subgraph(M1=M1, M2=M2, v_list=nodes_g1, v_list2=nodes_g2))
+    print("- Matriz de incidência:", is_subgraph(I1=I1, I2=I2, v_list=nodes_g1, v_list2=nodes_g2))
     print("- Lista de adjacência:", is_subgraph(adj1=adj1, adj2=adj2))
 
     print("\n=== Visualização dos grafos ===")
