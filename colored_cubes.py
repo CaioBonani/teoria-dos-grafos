@@ -133,8 +133,11 @@ def solve_cube_problem(cubes: list, v_order: list):
 
     disj = disj_graph(sub)
     print("========== Soluções ==========")
-    for i in disj:
-        print("Grafo ", i[0], " e ", i[1])
+    if len(disj) == 0:
+        print("Não foi encontrado nenhuma solução")
+    else:
+        for i in disj:
+            print("Grafo ", i[0], " e ", i[1])
     
     
 
