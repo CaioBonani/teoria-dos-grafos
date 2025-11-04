@@ -1,29 +1,18 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from main import get_degree
+from print_cubes import draw_cube_solution
 import copy
 
 
-def draw_graph(G: nx.Graph, v_order: list = None, title: str = None):
+def draw_graph(G: nx.Graph, title: str = None):
     """
     Plota o grafo usando posicoes fixas
     """
-    pos = {}
-    a = 1
-    b = 1
-    if v_order != None:
-        order = v_order
-    else:
-        order = G.nodes
-
     if title != None:
         plt.title(title)
 
-    for u in order:
-        pos[u] = (a,b)
-        b = -b
-        if b == 1:
-            a = -a
+    pos = nx.circular_layout(G)
     edge_labels = nx.get_edge_attributes(G, 'label')
 
     nx.draw(G, pos, with_labels=True, node_color='lightblue', 
@@ -112,7 +101,7 @@ def list_subgraphs(G: nx.Graph, label_arestas: list, subgraphs: list = None, cub
         return subgraphs
     return None
 
-def solve_cube_problem(cubes: list, v_order: list):
+def solve_cube_problem(cubes: list)-> tuple[list[object],list[object]]:
     """
     Resolve o problema dos cubos coloridos e printa as solucoes caso ache
     """
@@ -121,35 +110,45 @@ def solve_cube_problem(cubes: list, v_order: list):
     for cube in cubes:
         build_graph(G_cubes, cube, str(nc))
         nc += 1
-    draw_graph(G_cubes, v_order, title = "Grafo Principal")
+    draw_graph(G_cubes, title = "Grafo Principal")
 
     labels_arestas = nx.get_edge_attributes(G_cubes, 'label')
     sub = list_subgraphs(G_cubes, labels_arestas)
 
     print("Foram encontrados ", len(sub), " subgrafos")
     for i in range(len(sub)):
-        title = "Grafo " + str(i)
-        draw_graph(sub[i], v_order, title = title)
+        title = "Grafo " + str(i+1)
+        draw_graph(sub[i], title = title)
 
     disj = disj_graph(sub)
     print("========== Soluções ==========")
     if len(disj) == 0:
         print("Não foi encontrado nenhuma solução")
     else:
+        print("Foram encontradas", len(disj),"soluções")
         for i in disj:
-            print("Grafo ", i[0], " e ", i[1])
+            print("Grafo ", i[0]+1, " e ", i[1]+1)
+        return (sub,disj)
     
     
 
 if __name__ == "__main__":
     # define as cores das faces de cada cubo
     # sendo que as faces sao dadas em pares(posicao 0 e 1, 2 e 3, 4 e 5 sao opostas)
+    # cubes = [
+    #     ['red', 'red', 'red', 'green', 'blue', 'yellow'],
+    #     ['blue', 'yellow', 'yellow', 'green', 'green', 'red'],
+    #     ['yellow', 'green', 'red', 'yellow', 'blue', 'red'],
+    #     ['blue', 'red', 'green', 'green', 'blue', 'yellow']
+    # ]
     cubes = [
-        ['R', 'R', 'R', 'G', 'B', 'W'],
-        ['B', 'W', 'W', 'G', 'G', 'R'],
-        ['W', 'G', 'R', 'W', 'B', 'R'],
-        ['B', 'R', 'G', 'G', 'B', 'W']
+        ['red', 'red', 'red', 'brown', 'blue', 'orange'],
+        ['blue', 'yellow', 'yellow', 'green', 'purple', 'red'],
+        ['brown', 'pink', 'red', 'yellow', 'blue', 'red'],
+        ['blue', 'red', 'green', 'purple', 'blue', 'pink']
     ]
     #define a ordem que as 4 cores vao ser posicionadas no grafo
-    v_order = ['R', 'G', 'B', 'W']
-    solve_cube_problem(cubes, v_order)
+
+    solution = solve_cube_problem(cubes)
+    
+    draw_cube_solution(solution[0], solution[1])
