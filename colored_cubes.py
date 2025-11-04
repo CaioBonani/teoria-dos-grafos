@@ -101,7 +101,7 @@ def list_subgraphs(G: nx.Graph, label_arestas: list, subgraphs: list = None, cub
         return subgraphs
     return None
 
-def solve_cube_problem(cubes: list)-> tuple[list[object],list[object]]:
+def solve_cube_problem(cubes: list):
     """
     Resolve o problema dos cubos coloridos e printa as solucoes caso ache
     """
@@ -128,27 +128,28 @@ def solve_cube_problem(cubes: list)-> tuple[list[object],list[object]]:
         print("Foram encontradas", len(disj),"soluções")
         for i in disj:
             print("Grafo ", i[0]+1, " e ", i[1]+1)
-        return (sub,disj)
+        
+        draw_cube_solution(sub, disj)
     
     
 
 if __name__ == "__main__":
     # define as cores das faces de cada cubo
     # sendo que as faces sao dadas em pares(posicao 0 e 1, 2 e 3, 4 e 5 sao opostas)
-    # cubes = [
-    #     ['red', 'red', 'red', 'green', 'blue', 'yellow'],
-    #     ['blue', 'yellow', 'yellow', 'green', 'green', 'red'],
-    #     ['yellow', 'green', 'red', 'yellow', 'blue', 'red'],
-    #     ['blue', 'red', 'green', 'green', 'blue', 'yellow']
-    # ]
     cubes = [
-        ['red', 'red', 'red', 'brown', 'blue', 'orange'],
-        ['blue', 'yellow', 'yellow', 'green', 'purple', 'red'],
-        ['brown', 'pink', 'red', 'yellow', 'blue', 'red'],
-        ['blue', 'red', 'green', 'purple', 'blue', 'pink']
+        ['red', 'red', 'red', 'green', 'blue', 'yellow'],
+        ['blue', 'yellow', 'yellow', 'green', 'green', 'red'],
+        ['yellow', 'green', 'red', 'yellow', 'blue', 'red'],
+        ['blue', 'red', 'green', 'green', 'blue', 'yellow']
     ]
+    # cubes = [
+    #     ['red', 'red', 'red', 'brown', 'blue', 'orange'],
+    #     ['blue', 'yellow', 'yellow', 'green', 'purple', 'red'],
+    #     ['brown', 'pink', 'red', 'yellow', 'blue', 'red'],
+    #     ['blue', 'red', 'green', 'purple', 'blue', 'pink']
+    # ]
     #define a ordem que as 4 cores vao ser posicionadas no grafo
 
-    solution = solve_cube_problem(cubes)
+    solve_cube_problem(cubes)
     
-    draw_cube_solution(solution[0], solution[1])
+    # draw_cube_solution(solution[0], solution[1])
